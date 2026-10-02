@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10191f" />
+  <meta name="description" content="FF14のスクリーンショットに月間カレンダーを重ねて、スマートフォン用の壁紙画像を作れる無料の非公式ツール。画像はブラウザ内だけで処理します。" />
+  <title>EORZEA CALENDAR | FF14 SS WALLPAPER MAKER</title>
+  <style>
+    :root { color-scheme: dark; --base:#10191f; --panel:#17242b; --panel-soft:#1b2b32; --stroke:rgba(231,236,226,.13); --muted:#9babac; --text:#f3f4ec; --gold:#e6c997; --sage:#b5d7c8; --radius:20px; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-width:320px; background:var(--base); color:var(--text); font-family: -apple-system, BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif; line-height:1.6; }
+    body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse 65% 42% at 83% 5%,rgba(84,121,121,.22),transparent 80%),radial-gradient(ellipse 65% 40% at 0% 45%,rgba(96,72,90,.15),transparent 80%); }
+    button,input,select { font:inherit; }
+    button { cursor:pointer; }
+    button:disabled { cursor:not-allowed; opacity:.43; }
+    button:focus-visible,input:focus-visible,select:focus-visible,.upload-box:focus-within { outline:2px solid #dfc391; outline-offset:3px; }
+    .site { width:min(1240px,calc(100% - 56px)); margin:0 auto; }
+    .topbar { min-height:90px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--stroke); gap:20px; }
+    .brand { display:flex; gap:14px; align-items:center; text-decoration:none; color:inherit; }
+    .brand-mark { width:44px; height:44px; border:1px solid #d6b98185; border-radius:50%; display:grid; place-items:center; color:var(--gold); font-size:21px; position:relative; }
+    .brand-mark::before,.brand-mark::after { content:""; position:absolute; height:1px; width:12px; background:var(--gold); top:50%; }
+    .brand-mark::before { left:-6px; } .brand-mark::after { right:-6px; }
+    .brand-name { font-family:Georgia,"Times New Roman",serif; font-size:18px; letter-spacing:.16em; line-height:1.05; }
+    .brand-name b { color:var(--gold); font-weight:400; }
+    .brand-tag { display:block; font-size:9px; letter-spacing:.25em; color:var(--muted); margin-top:6px; }
+    .studio-link { text-decoration:none; color:#d7dcd5; font-size:11px; letter-spacing:.12em; border:1px solid var(--stroke); padding:9px 15px; border-radius:30px; transition:.2s; }
+    .studio-link:hover { border-color:var(--gold); color:var(--gold); }
+    .hero { padding:45px 0 36px; position:relative; }
+    .eyebrow { margin:0 0 12px; color:var(--gold); font-size:11px; letter-spacing:.31em; }
+    h1 { font-family:Georgia,"Yu Mincho","Hiragino Mincho ProN",serif; font-size:clamp(26px,3vw,43px); font-weight:400; line-height:1.5; letter-spacing:.04em; margin:0; }
+    h1 em { font-style:normal; color:#bad8c8; }
+    .hero-sub { font-size:13px; color:var(--muted); margin:12px 0 0; }
+    .workspace { display:grid; grid-template-columns:minmax(360px,1fr) minmax(430px,1.12fr); align-items:start; gap:25px; padding-bottom:75px; }
+    .controls { display:grid; gap:16px; }
+    .section { border:1px solid var(--stroke); background:linear-gradient(145deg,rgba(33,50,57,.94),rgba(22,34,40,.96)); border-radius:var(--radius); padding:22px 23px 24px; box-shadow:0 12px 38px rgba(0,0,0,.06); }
+    .section-title { display:flex; align-items:center; gap:13px; margin:0 0 18px; font-size:14px; font-weight:600; letter-spacing:.06em; }
+    .section-num { color:var(--gold); font-family:Georgia,serif; font-size:20px; font-weight:400; }
+    .upload-box { display:block; padding:23px 12px; border:1px dashed #a9bdaf64; background:#17292d; border-radius:13px; text-align:center; position:relative; cursor:pointer; transition:.2s; }
+    .upload-box:hover,.upload-box.dragover { border-color:#e5d3a0; background:#21383c; }
+    .upload-box input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+    .upload-icon { display:block; margin:0 auto 5px; font-size:27px; color:var(--gold); }
+    .upload-main { font-weight:600; font-size:13px; }
+    .upload-sub { color:var(--muted); display:block; font-size:11px; margin-top:4px; }
+    .file-name { margin:10px 0 0; color:var(--sage); overflow-wrap:anywhere; font-size:11px; min-height:1.6em; }
+    .field { display:block; margin-top:18px; }
+    .field-label { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; font-size:12px; color:#d8ded8; }
+    .field-label output { color:var(--gold); font-size:11px; font-variant-numeric:tabular-nums; }
+    .field-caption { font-size:11px; line-height:1.5; color:var(--muted); margin:6px 0 0; }
+    input[type=range] { width:100%; display:block; cursor:pointer; accent-color:#d9c196; margin:8px 0; }
+    input[type=color] { width:45px; height:35px; padding:3px; background:#23343b; border:1px solid var(--stroke); border-radius:8px; cursor:pointer; }
+    input[type=month],select { min-width:0; color:var(--text); background:#101f26; border:1px solid #5062696e; border-radius:10px; padding:10px; width:100%; }
+    input[type=month] { color-scheme:dark; }
+    .month-row { display:grid; grid-template-columns:41px 1fr 41px; gap:9px; }
+    .square-button { border:1px solid var(--stroke); color:var(--gold); background:#14252b; border-radius:10px; font-size:24px; line-height:1; }
+    .subtle-btn { border:1px solid var(--stroke); background:#172830; color:#dbe0d8; border-radius:9px; padding:7px 10px; font-size:11px; }
+    .subtle-btn:hover { border-color:#d7c39b; }
+    .full { width:100%; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    .three-col { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .tab { border:1px solid #60717869; border-radius:9px; background:#122229; color:#adbdbb; padding:10px 6px; font-size:11px; transition:.2s; }
+    .tab[aria-pressed=true] { color:#17252c; font-weight:700; background:var(--gold); border-color:var(--gold); }
+    .style-selector .tab { padding:14px 5px; }
+    .style-indicator { display:block; margin-bottom:6px; font-size:16px; font-family:Georgia,serif; }
+    .check-row { display:flex; gap:10px; align-items:center; font-size:12px; padding:13px 0 0; color:#d8ded8; cursor:pointer; }
+    .check-row input { width:17px; height:17px; accent-color:#d9c196; }
+    .color-row { display:flex; gap:11px; align-items:center; justify-content:space-between; margin-top:18px; font-size:12px; }
+    .row-rule { height:1px; background:var(--stroke); margin:20px 0 5px; }
+    .preview-area { position:sticky; top:18px; min-width:0; }
+    .preview-board { background:linear-gradient(135deg,#26393e 0%,#14262d 55%,#1a2c33 100%); border:1px solid var(--stroke); border-radius:25px; padding:20px 18px 22px; text-align:center; position:relative; overflow:hidden; }
+    .preview-board::before { content:""; position:absolute; width:280px; height:280px; border:1px solid rgba(255,255,255,.04); border-radius:50%; left:-150px; top:40%; pointer-events:none; }
+    .preview-top { display:flex; align-items:center; justify-content:space-between; text-align:left; gap:10px; margin-bottom:20px; position:relative; }
+    .preview-top strong { font-size:11px; letter-spacing:.2em; font-weight:500; }
+    .preview-top span { font-size:11px; color:var(--muted); }
+    .phone-outer { height:min(68vh,680px); max-height:680px; margin:0 auto; display:inline-flex; align-items:center; justify-content:center; padding:8px; border-radius:clamp(19px,2.7vw,29px); background:linear-gradient(130deg,#6e7779,#242c33 20%,#13171b 77%,#737b76); border:1px solid #92a19f78; box-shadow:0 16px 42px rgba(0,0,0,.45),inset 0 0 0 2px #182024; position:relative; max-width:100%; }
+    .phone-screen { height:100%; aspect-ratio:9/19.5; overflow:hidden; position:relative; border-radius:clamp(14px,2.1vw,22px); background:#1e3238; touch-action:none; }
+    .phone-screen.has-photo { cursor:grab; }
+    .phone-screen.dragging { cursor:grabbing; }
+    .phone-screen canvas { display:block; height:100%; width:100%; }
+    .phone-hint { position:absolute; left:0; right:0; bottom:10%; pointer-events:none; display:inline-flex; justify-content:center; }
+    .phone-hint span { color:white; background:#0e1c20bd; border:1px solid #ffffff55; border-radius:30px; font-size:10px; padding:6px 12px; backdrop-filter:blur(10px); }
+    .preview-foot { font-size:11px; margin:16px auto 0; color:var(--muted); position:relative; }
+    .action-panel { border:1px solid var(--stroke); background:#18282e; border-radius:20px; margin-top:13px; padding:20px; }
+    .action-kicker { margin:0 0 12px; color:var(--sage); font-size:11px; letter-spacing:.2em; }
+    .download-button { border:0; width:100%; background:linear-gradient(135deg,#e8d5ae,#cbab78); color:#203038; font-weight:800; border-radius:11px; padding:14px 18px; box-shadow:0 8px 24px #080d0d42; }
+    .download-button:not(:disabled):hover { filter:brightness(1.08); }
+    .overlay-btn { border:1px solid #b9aa8b78; background:transparent; color:var(--gold); font-weight:600; width:100%; border-radius:11px; margin-top:10px; padding:12px 14px; }
+    .overlay-btn:hover { background:#ffffff0d; }
+    .action-caption { font-size:10px; color:var(--muted); margin:13px 0 0; }
+    .footer { border-top:1px solid var(--stroke); padding:25px 0 38px; display:flex; justify-content:space-between; align-items:flex-start; gap:25px; color:var(--muted); font-size:10px; line-height:1.9; }
+    .footer strong { color:#d7d9d1; font-size:11px; font-weight:500; }
+    .footer a { color:var(--gold); }
+    #toast { position:fixed; z-index:100; bottom:25px; left:50%; transform:translate(-50%,20px); opacity:0; pointer-events:none; transition:.3s; max-width:calc(100% - 32px); padding:12px 20px; border:1px solid #d2c29877; background:#1d2a2d; color:white; border-radius:13px; box-shadow:0 12px 30px #0007; font-size:12px; }
+    #toast.show { transform:translate(-50%,0); opacity:1; }
+    @media(max-width:960px) { .workspace {grid-template-columns:minmax(310px,1fr) minmax(300px,1fr); gap:15px;} .section {padding:18px;} .phone-outer {height:min(60vh,600px);} }
+    @media(max-width:760px) { .site {width:calc(100% - 30px);} .topbar {min-height:76px;} .brand-name {font-size:15px;} .studio-link {font-size:9px;padding:8px;} .brand-mark {width:35px;height:35px; flex-shrink:0;} .hero {padding:33px 0 25px;} .hero-sub {font-size:12px;} .workspace {display:flex;flex-direction:column;gap:20px;} .controls {order:2;width:100%;} .preview-area {order:1;position:static;width:100%;} .phone-outer {height:min(55vh,515px);} .preview-board {padding:14px 14px 20px;} .preview-top {margin-bottom:12px;} .section {padding:21px;} .footer {flex-direction:column;gap:8px;} }
+    @media(max-width:420px) { .brand {gap:8px;} .brand-name {font-size:12px;} .brand-tag {font-size:7px;} .studio-link {font-size:8px;white-space:nowrap;} .phone-outer {height:min(52vh,480px);} }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after {transition:none!important;scroll-behavior:auto!important;} }
+  </style>
+</head>
+<body>
+<div class="site">
+  <header class="topbar">
+    <a href="#" class="brand" aria-label="EORZEA CALENDAR ホーム"><span class="brand-mark" aria-hidden="true">✦</span><span><span class="brand-name">EORZEA <b>CALENDAR</b></span><span class="brand-tag">SS WALLPAPER MAKER</span></span></a>
+    <a class="studio-link" href="https://cyanstella.github.io/EORZEA_PROFILE_STUDIO/" target="_blank" rel="noopener noreferrer">EORZEA PROFILE STUDIO ↗</a>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">YOUR ADVENTURE, EVERY DAY.</p>
+      <h1>旅の記憶を、<em>毎日の景色</em>に。</h1>
+      <p class="hero-sub">お気に入りのFF14スクリーンショットにカレンダーを添えて、あなただけのスマホ壁紙を。</p>
+    </section>
+    <div class="workspace">
+      <div class="controls">
+        <section class="section" aria-labelledby="image-heading">
+          <h2 class="section-title" id="image-heading"><span class="section-num">01</span> スクリーンショット</h2>
+          <label class="upload-box" id="uploadBox"><span class="upload-icon" aria-hidden="true">✧</span><span class="upload-main">SS画像を選択する</span><span class="upload-sub">クリックして選択 / ドラッグ＆ドロップ · JPEG / PNG / WebP など</span><input id="fileInput" type="file" accept="image/*" aria-label="スクリーンショットをアップロード" /></label>
+          <p id="fileName" class="file-name" aria-live="polite">画像はサーバーに送信されません。</p>
+          <div class="field"><div class="field-label"><label for="zoom">画像の拡大率</label><output id="zoomVal">100%</output></div><input id="zoom" type="range" min="100" max="300" value="100" step="1" /><p class="field-caption">プレビュー上の画像をマウスや指で動かして位置を調整できます。</p></div>
+          <button type="button" id="resetImage" class="subtle-btn full">画像の位置・拡大率をリセット</button>
+          <div class="two-col"><div class="field"><div class="field-label"><label for="filmColor">カバーフィルム</label></div><select id="filmColor"><option value="black">黒</option><option value="white">白</option></select></div><div class="field"><div class="field-label"><label for="filmAlpha">フィルム濃度</label><output id="filmAlphaVal">10%</output></div><input type="range" id="filmAlpha" min="0" max="65" value="10" /></div></div>
+        </section>
+        <section class="section" aria-labelledby="calendar-heading">
+          <h2 class="section-title" id="calendar-heading"><span class="section-num">02</span> カレンダー</h2>
+          <div class="month-row"><button class="square-button" id="prevMonth" aria-label="前月">‹</button><input id="month" type="month" aria-label="表示する年月" /><button class="square-button" id="nextMonth" aria-label="翌月">›</button></div>
+          <div class="field"><div class="field-label"><label for="weekStart">曜日の始まり</label></div><select id="weekStart"><option value="0">日曜日から</option><option value="1" selected>月曜日から</option></select></div>
+          <div class="field"><span class="field-label">カレンダーの配置</span><div class="three-col" id="positionTabs"><button class="tab" data-position="top" aria-pressed="false">上</button><button class="tab" data-position="middle" aria-pressed="false">中央</button><button class="tab" data-position="bottom" aria-pressed="true">下</button></div></div>
+          <div class="field"><div class="field-label"><label for="calendarSize">カレンダーの大きさ</label><output id="calendarSizeVal">100%</output></div><input id="calendarSize" type="range" min="65" max="115" value="100" step="1" /></div>
+          <div class="two-col"><div class="field"><div class="field-label"><label for="calendarX">左右に移動</label><output id="calendarXVal">0</output></div><input id="calendarX" type="range" min="-95" max="95" value="0" step="1" /></div><div class="field"><div class="field-label"><label for="calendarY">上下に移動</label><output id="calendarYVal">66%</output></div><input id="calendarY" type="range" min="5" max="85" value="66" step="1" /></div></div>
+        </section>
+        <section class="section" aria-labelledby="style-heading">
+          <h2 class="section-title" id="style-heading"><span class="section-num">03</span> デザイン</h2>
+          <div class="three-col style-selector" id="styleTabs"><button class="tab" data-style="glass" aria-pressed="true"><span class="style-indicator">▤</span>GLASS</button><button class="tab" data-style="minimal" aria-pressed="false"><span class="style-indicator">Aa</span>MINIMAL</button><button class="tab" data-style="frame" aria-pressed="false"><span class="style-indicator">□</span>FRAME</button></div>
+          <div class="field"><div class="field-label"><label for="headingFormat">見出しの表記</label></div><select id="headingFormat"><option value="en">OCTOBER / 2026</option><option value="jp">2026年10月</option><option value="numeric">2026 / 10</option></select></div>
+          <div class="field"><div class="field-label"><label for="font">文字のフォント</label></div><select id="font"><option value="sans">モダン</option><option value="serif">明朝風</option><option value="rounded">丸文字風</option></select></div>
+          <div class="two-col"><div class="color-row"><label for="textColor">基本の文字色</label><input id="textColor" type="color" value="#ffffff" /></div><div class="color-row"><label for="bgColor">パネル色</label><input id="bgColor" type="color" value="#122029" /></div></div>
+          <div class="field"><div class="field-label"><label for="bgAlpha">パネルの濃さ</label><output id="bgAlphaVal">47%</output></div><input type="range" id="bgAlpha" min="0" max="90" value="47" /></div>
+          <label class="check-row"><input type="checkbox" id="weekendColor" checked />土曜・日曜を色分けする</label>
+          <label class="check-row"><input type="checkbox" id="showCredit" checked />壁紙内に © SQUARE ENIX を表示する</label>
+          <div class="field"><div class="field-label"><label for="creditAlign">© SQUARE ENIX の位置</label></div><select id="creditAlign"><option value="left">左</option><option value="center">中央</option><option value="right" selected>右</option></select></div>
+        </section>
+        <section class="section" aria-labelledby="export-heading">
+          <h2 class="section-title" id="export-heading"><span class="section-num">04</span> 画像サイズ</h2>
+          <label class="field" style="margin-top:0"><span class="field-label">スマートフォン壁紙の解像度</span><select id="resolution"><option value="1080x1920">1080 × 1920（標準 9:16）</option><option value="1170x2532" selected>1170 × 2532（縦長）</option><option value="1290x2796">1290 × 2796（大型スマホ）</option><option value="1440x3200">1440 × 3200（高解像度）</option></select></label>
+          <p class="field-caption">お使いのスマホに合わせて選んでください。PNGで出力します。祝日は表示しません。</p>
+        </section>
+      </div>
+      <div class="preview-area">
+        <section class="preview-board" aria-label="スマホ壁紙プレビュー">
+          <div class="preview-top"><strong>LIVE PREVIEW</strong><span id="previewDims">1170 × 2532 PX</span></div>
+          <div class="phone-outer"><div class="phone-screen" id="phoneScreen"><canvas id="previewCanvas" aria-label="カレンダー壁紙のプレビュー"></canvas><div class="phone-hint" id="phoneHint"><span>SSを選ぶと画像の位置を調整できます</span></div></div></div>
+          <p class="preview-foot">✦　仕上がりを見ながら自由に調整　✦</p>
+        </section>
+        <section class="action-panel">
+          <p class="action-kicker">READY TO MAKE YOUR WALLPAPER?</p>
+          <button type="button" class="download-button" id="download" disabled>↓ スマホ用壁紙をPNGで保存</button>
+          <button type="button" class="overlay-btn" id="downloadOverlay">↓ カレンダーだけ透過PNGで保存</button>
+          <p class="action-caption">画像の処理と保存はお使いのブラウザ内で完結します。アップロード・会員登録は不要です。</p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"><div><strong>EORZEA CALENDAR — SS WALLPAPER MAKER Ver1.0</strong><br />FFXIVのファンが制作した非公式ツールです。株式会社スクウェア・エニックスとは関係ありません。<br />FINAL FANTASY XIV © SQUARE ENIX</div><div>IDEA & DESIGN BY cyan_stella<br /><a href="https://x.com/cyan_stella" target="_blank" rel="noopener noreferrer">X @cyan_stella ↗</a></div></footer>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const state = {
+    image:null, zoom:100, panX:0, panY:0, style:'glass',
+    year:new Date().getFullYear(), month:new Date().getMonth()+1,
+    w:1170,h:2532, position:'bottom', renderScheduled:false
+  };
+  const els = {
+    file:$('fileInput'), month:$('month'), preview:$('previewCanvas'), screen:$('phoneScreen'),
+    download:$('download'), overlay:$('downloadOverlay'), zoom:$('zoom'), size:$('calendarSize'), x:$('calendarX'), y:$('calendarY')
+  };
+  const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const clamp = (n,a,b) => Math.max(a,Math.min(b,n));
+  const rgba = (hex,alpha) => {
+    const s=hex.replace('#',''); return `rgba(${parseInt(s.slice(0,2),16)},${parseInt(s.slice(2,4),16)},${parseInt(s.slice(4,6),16)},${alpha})`;
+  };
+  const getFont = () => {
+    const key=$('font').value;
+    if (key === 'serif') return 'Georgia,"Yu Mincho","Hiragino Mincho ProN",serif';
+    if (key === 'rounded') return '"Arial Rounded MT Bold","Segoe Print","Hiragino Maru Gothic ProN","Meiryo","Yu Gothic",cursive';
+    return 'Inter,"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif';
+  };
+  let toastHandle;
+  function notify(message) { const node=$('toast'); node.textContent=message;node.classList.add('show');clearTimeout(toastHandle);toastHandle=setTimeout(()=>node.classList.remove('show'),3200); }
+  function setMonthInput(){ els.month.value=`${String(state.year).padStart(4,'0')}-${String(state.month).padStart(2,'0')}`; }
+  function setMonth(year,month){
+    if (!Number.isFinite(year)||!Number.isFinite(month)) return;
+    const normalized=new Date(year,month-1,1);
+    if (normalized.getFullYear()<1900||normalized.getFullYear()>2100) return;
+    state.year=normalized.getFullYear();state.month=normalized.getMonth()+1;setMonthInput();scheduleRender();
+  }
+  function calendarGrid() {
+    const first=new Date(state.year,state.month-1,1).getDay();
+    const weekStart=Number($('weekStart').value);
+    const offset=(first-weekStart+7)%7;
+    const days=new Date(state.year,state.month,0).getDate();
+    return { offset, days, rows:Math.max(5,Math.ceil((offset+days)/7)),weekStart };
+  }
+  function constrainPan(logicalHeight) {
+    if (!state.image) {state.panX=0;state.panY=0;return;}
+    const cover=Math.max(1080/state.image.naturalWidth,logicalHeight/state.image.naturalHeight);
+    const actualScale=cover*state.zoom/100;
+    const width=state.image.naturalWidth*actualScale;
+    const height=state.image.naturalHeight*actualScale;
+    state.panX=clamp(state.panX,-Math.max(0,(width-1080)/2),Math.max(0,(width-1080)/2));
+    state.panY=clamp(state.panY,-Math.max(0,(height-logicalHeight)/2),Math.max(0,(height-logicalHeight)/2));
+  }
+  function drawBackground(ctx,H) {
+    const gradient=ctx.createLinearGradient(0,0,1080,H);
+    gradient.addColorStop(0,'#3d5460');gradient.addColorStop(.42,'#54656b');gradient.addColorStop(.73,'#293f48');gradient.addColorStop(1,'#122c38');
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,1080,H);
+    const glow=ctx.createRadialGradient(810,H*.28,0,810,H*.28,680);
+    glow.addColorStop(0,'rgba(246,220,185,.6)');glow.addColorStop(1,'rgba(246,220,185,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,1080,H);
+    ctx.fillStyle='#36515b';ctx.beginPath();ctx.moveTo(0,H*.68);ctx.lineTo(260,H*.43);ctx.lineTo(550,H*.75);ctx.lineTo(770,H*.58);ctx.lineTo(1080,H*.78);ctx.lineTo(1080,H);ctx.lineTo(0,H);ctx.fill();
+    ctx.fillStyle='#223b48';ctx.beginPath();ctx.moveTo(0,H*.77);ctx.lineTo(210,H*.65);ctx.lineTo(380,H*.8);ctx.lineTo(770,H*.68);ctx.lineTo(1080,H*.85);ctx.lineTo(1080,H);ctx.lineTo(0,H);ctx.fill();
+    ctx.textAlign='center';ctx.fillStyle='rgba(255,247,226,.72)';ctx.font='42px Georgia,serif';ctx.fillText('YOUR ADVENTURE',540,H*.31);
+    ctx.fillStyle='rgba(255,247,226,.45)';ctx.font='20px Georgia,serif';ctx.fillText('PLACE YOUR SCREENSHOT HERE',540,H*.31+44);
+  }
+  function roundedRect(ctx,x,y,w,h,r) {
+    const k=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+k,y);ctx.arcTo(x+w,y,x+w,y+h,k);ctx.arcTo(x+w,y+h,x,y+h,k);ctx.arcTo(x,y+h,x,y,k);ctx.arcTo(x,y,x+w,y,k);ctx.closePath();
+  }
+  function drawPhoto(ctx,H){
+    if (!state.image) {drawBackground(ctx,H);return;}
+    constrainPan(H);
+    const img=state.image;
+    const cover=Math.max(1080/img.naturalWidth,H/img.naturalHeight)*state.zoom/100;
+    const w=img.naturalWidth*cover,h=img.naturalHeight*cover;
+    ctx.drawImage(img,(1080-w)/2+state.panX,(H-h)/2+state.panY,w,h);
+  }
+  function drawCalendar(ctx,H) {
+    const s=Number(els.size.value)/100;
+    const {offset,days,rows,weekStart}=calendarGrid();
+    const p=43*s,cellW=(860*s-2*p)/7,rowH=78*s;
+    const width=860*s,height=(236+78*rows)*s;
+    const x=clamp((1080-width)/2+Number(els.x.value),26,1080-width-26);
+    const y=clamp(H*Number(els.y.value)/100,45,H-height-80);
+    const color=$('textColor').value;
+    const alpha=Number($('bgAlpha').value)/100;
+    const style=state.style;
+    ctx.save();
+    if (style==='glass') {
+      ctx.fillStyle=rgba($('bgColor').value,alpha);roundedRect(ctx,x,y,width,height,30*s);ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1.5*s;ctx.stroke();
+    } else if(style==='frame') {
+      ctx.fillStyle=rgba($('bgColor').value,alpha*.7);roundedRect(ctx,x,y,width,height,4*s);ctx.fill();
+      ctx.strokeStyle=rgba(color,.72);ctx.lineWidth=2*s;ctx.strokeRect(x+9*s,y+9*s,width-18*s,height-18*s);
+    }
+    // Independent text shadow makes thin calendar lettering legible against SSs.
+    ctx.shadowColor='rgba(0,0,0,.58)';ctx.shadowBlur=style==='minimal'?9*s:4*s;ctx.shadowOffsetY=2*s;
+    const headingFormat=$('headingFormat').value;
+    let title='',sub='';
+    if(headingFormat==='en') {title=MONTHS[state.month-1];sub=String(state.year);}
+    else if(headingFormat==='jp') {title=`${state.year}年${state.month}月`;sub='EORZEA DAYS';}
+    else {title=`${state.year} / ${String(state.month).padStart(2,'0')}`;sub='EORZEA DAYS';}
+    const font=getFont();
+    ctx.fillStyle=color;ctx.textAlign='left';ctx.textBaseline='middle';
+    const headingSize=(headingFormat==='jp'?53:60)*s;
+    ctx.font=`600 ${headingSize}px ${font}`;ctx.fillText(title,x+p,y+86*s,width-2*p);
+    const subSize=(headingFormat==='en'?34:25)*s;
+    ctx.font=`500 ${subSize}px ${font}`;ctx.textAlign='right';ctx.fillText(sub,x+width-p,y+136*s);
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    ctx.strokeStyle=rgba(color,.48);ctx.lineWidth=1*s;ctx.beginPath();ctx.moveTo(x+p,y+159*s);ctx.lineTo(x+width-p,y+159*s);ctx.stroke();
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const left=x+p;
+    for(let col=0;col<7;col++){
+      const d=(col+weekStart)%7;
+      ctx.font=`600 ${20*s}px ${font}`;
+      ctx.fillStyle=getDayColor(d,color);
+      ctx.fillText(WEEKDAYS[d],left+cellW*(col+.5),y+193*s);
+    }
+    for(let date=1;date<=days;date++) {
+      const index=offset+date-1;
+      const col=index%7,row=Math.floor(index/7),day=(col+weekStart)%7;
+      ctx.fillStyle=getDayColor(day,color);
+      ctx.font=`500 ${38*s}px ${font}`;
+      if(style==='minimal'){ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=9*s;ctx.shadowOffsetY=2*s;}
+      ctx.fillText(String(date),left+cellW*(col+.5),y+(250+78*row)*s);
+      ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    }
+    ctx.restore();
+  }
+  function getDayColor(day,normal){
+    if (!$('weekendColor').checked) return normal;
+    if (day===0) return '#ffb4bb';
+    if (day===6) return '#a7daff';
+    return normal;
+  }
+  function draw(ctx,width,height,onlyOverlay=false){
+    ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,width,height);
+    const scale=width/1080;
+    ctx.save();ctx.scale(scale,scale);
+    const H=height/scale;
+    if (!onlyOverlay) {
+      drawPhoto(ctx,H);
+      const filmOpacity=Number($('filmAlpha').value)/100;
+      if(filmOpacity){ ctx.fillStyle=$('filmColor').value==='white'?`rgba(255,255,255,${filmOpacity})`:`rgba(0,0,0,${filmOpacity})`;ctx.fillRect(0,0,1080,H); }
+    }
+    drawCalendar(ctx,H);
+    if ($('showCredit').checked) {
+      const creditAlign=$('creditAlign').value;
+      let creditX=1033;
+      ctx.textBaseline='alphabetic';
+      if(creditAlign==='left'){ctx.textAlign='left';creditX=47;}
+      else if(creditAlign==='center'){ctx.textAlign='center';creditX=540;}
+      else {ctx.textAlign='right';creditX=1033;}
+      ctx.fillStyle=rgba($('textColor').value,.92);
+      ctx.font=`500 19px ${getFont()}`;ctx.shadowColor='rgba(0,0,0,.52)';ctx.shadowBlur=5;
+      ctx.fillText('© SQUARE ENIX',creditX,H-34);ctx.shadowBlur=0;
+    }
+    ctx.restore();
+  }
+  function updatePreview(){
+    state.renderScheduled=false;
+    const canvas=els.preview;
+    // Draw preview at reduced pixel resolution; full PNG is created only on export.
+    const width=450,height=Math.round(width*state.h/state.w);
+    if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+    draw(canvas.getContext('2d'),width,height,false);
+  }
+  function scheduleRender() { if(state.renderScheduled) return;state.renderScheduled=true;requestAnimationFrame(updatePreview); }
+  function syncValues(){
+    [['zoom','zoomVal','%'],['calendarSize','calendarSizeVal','%'],['calendarX','calendarXVal',''],['calendarY','calendarYVal','%'],['filmAlpha','filmAlphaVal','%'],['bgAlpha','bgAlphaVal','%']].forEach(([id,output,suffix])=>$(output).textContent=$(id).value+suffix);
+    $('previewDims').textContent=`${state.w} × ${state.h} PX`;
+    els.screen.style.aspectRatio=`${state.w} / ${state.h}`;
+    els.screen.classList.toggle('has-photo',Boolean(state.image));
+    $('phoneHint').hidden=Boolean(state.image);
+    els.download.disabled=!state.image;
+  }
+  function markTabs(selector,attribute,selected) {
+    document.querySelectorAll(selector).forEach(button=>button.setAttribute('aria-pressed',String(button.dataset[attribute]===selected)));
+  }
+  function setPosition(position){
+    const presets={top:8,middle:36,bottom:66};
+    state.position=position;els.y.value=presets[position];markTabs('[data-position]','position',position);syncValues();scheduleRender();
+  }
+  function setStyle(style){state.style=style;markTabs('[data-style]','style',style);scheduleRender();}
+  const rangeIds=['zoom','calendarSize','calendarX','calendarY','filmAlpha','bgAlpha'];
+  rangeIds.forEach(id=>$(id).addEventListener('input',()=>{
+    if(id==='zoom'){state.zoom=Number(els.zoom.value);constrainPan(1080*state.h/state.w);}
+    if(id==='calendarY'){state.position='custom';markTabs('[data-position]','position',state.position);}
+    syncValues();scheduleRender();
+  }));
+  ['weekStart','font','headingFormat','textColor','bgColor','filmColor','weekendColor','showCredit','creditAlign'].forEach(id=>$(id).addEventListener('input',scheduleRender));
+  $('resolution').addEventListener('change',()=>{
+    const parts=$('resolution').value.split('x').map(Number);
+    state.w=parts[0];state.h=parts[1];constrainPan(1080*state.h/state.w);syncValues();scheduleRender();
+  });
+  $('month').addEventListener('change',()=>{const m=/^(\d{4})-(\d{2})$/.exec(els.month.value);if(m)setMonth(Number(m[1]),Number(m[2]));});
+  $('prevMonth').addEventListener('click',()=>setMonth(state.year,state.month-1));
+  $('nextMonth').addEventListener('click',()=>setMonth(state.year,state.month+1));
+  document.querySelectorAll('[data-position]').forEach(b=>b.addEventListener('click',()=>setPosition(b.dataset.position)));
+  document.querySelectorAll('[data-style]').forEach(b=>b.addEventListener('click',()=>setStyle(b.dataset.style)));
+  $('resetImage').addEventListener('click',()=>{state.panX=0;state.panY=0;state.zoom=100;els.zoom.value=100;syncValues();scheduleRender();});
+  function loadFile(file){
+    if(!file) return;
+    if(!file.type.startsWith('image/')){notify('画像ファイルを選んでください。');return;}
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);state.image=img;state.zoom=100;state.panX=0;state.panY=0;els.zoom.value=100;$('fileName').textContent=`選択中：${file.name}`;syncValues();scheduleRender();notify('SS画像を読み込みました。');};
+    img.onerror=()=>{URL.revokeObjectURL(url);notify('画像を読み込めませんでした。PNGまたはJPEGでもお試しください。');};
+    img.src=url;
+  }
+  els.file.addEventListener('change',e=>loadFile(e.target.files[0]));
+  const upload=$('uploadBox');
+  ['dragenter','dragover'].forEach(eventName=>upload.addEventListener(eventName,e=>{e.preventDefault();upload.classList.add('dragover');}));
+  ['dragleave','drop'].forEach(eventName=>upload.addEventListener(eventName,e=>{e.preventDefault();upload.classList.remove('dragover');}));
+  upload.addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+  let dragging=false,lastX=0,lastY=0;
+  els.screen.addEventListener('pointerdown',e=>{
+    if(!state.image)return;
+    dragging=true;lastX=e.clientX;lastY=e.clientY;
+    els.screen.setPointerCapture(e.pointerId);els.screen.classList.add('dragging');
+  });
+  els.screen.addEventListener('pointermove',e=>{
+    if(!dragging||!state.image)return;
+    const rect=els.screen.getBoundingClientRect();
+    const k=1080/rect.width;
+    state.panX+=(e.clientX-lastX)*k;state.panY+=(e.clientY-lastY)*k;
+    lastX=e.clientX;lastY=e.clientY;
+    constrainPan(1080*state.h/state.w);scheduleRender();
+  });
+  function stopDragging(){dragging=false;els.screen.classList.remove('dragging');}
+  ['pointerup','pointercancel','lostpointercapture'].forEach(name=>els.screen.addEventListener(name,stopDragging));
+  function downloadCanvas(onlyOverlay){
+    if(!onlyOverlay&&!state.image){notify('先にSS画像を選択してください。');return;}
+    const canvas=document.createElement('canvas');canvas.width=state.w;canvas.height=state.h;
+    try {draw(canvas.getContext('2d'),state.w,state.h,onlyOverlay);}catch(e){notify('画像の作成に失敗しました。別の画像をお試しください。');return;}
+    canvas.toBlob(blob=>{
+      if(!blob){notify('PNGの保存に失敗しました。');return;}
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=`eorzea-calendar-${state.year}-${String(state.month).padStart(2,'0')}${onlyOverlay?'-transparent':''}-${state.w}x${state.h}.png`;
+      document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),6000);
+      notify(onlyOverlay?'透過カレンダーのPNGを作成しました。':'スマホ用壁紙のPNGを作成しました。');
+    },'image/png');
+  }
+  els.download.addEventListener('click',()=>downloadCanvas(false));
+  els.overlay.addEventListener('click',()=>downloadCanvas(true));
+  setMonthInput();syncValues();scheduleRender();
+})();
+</script>
+</body>
+</html>

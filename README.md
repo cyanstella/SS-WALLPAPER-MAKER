@@ -48,6 +48,12 @@ GitHubで `SS-WALLPAPER-MAKER` リポジトリを作成し、そのルートに 
 - 高解像度PNG / 透過カレンダーPNG
 - 日本語UI・スマホ対応
 
+## Cloudflare Web Analytics
+
+- EORZEA PROFILE STUDIOなどと同じ解析トークンを `index.html` の `</body>` 直前に設置しています。追加でトークンを発行する必要はありません。
+- GitHub Pages公開後は、Cloudflare Web Analyticsの管理画面でアクセス状況を確認できます。共通トークンで集計されるため、このツールのみを確認する場合はページURL `/SS-WALLPAPER-MAKER/` で絞り込んでください。
+- 画像の読み込み・合成・PNG書き出しは引き続き端末内で行い、FF14のSS画像そのものをCloudflareに送信する機能はありません。Web Analyticsによりページのアクセス情報はCloudflareに送られます。
+
 ## ご注意
 
 祝日・個人予定は表示しません。画像の読み込みはブラウザの対応形式に依存します。スマホで壁紙に設定する操作はOS側で行ってください。
